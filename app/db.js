@@ -1,126 +1,91 @@
-const fs = require('fs');
-const path = require('path');
 const bcrypt = require('bcryptjs');
+const { connect, getDb } = require('./mongo');
 
-const DB_FILE = path.join(__dirname, '../database.json');
-
-// Inicializuj databázi, pokud neexistuje
-function initDB() {
-  if (!fs.existsSync(DB_FILE)) {
-    const defaultDB = {
-      users: {},
-      createdAt: new Date().toISOString(),
-    };
-    fs.writeFileSync(DB_FILE, JSON.stringify(defaultDB, null, 2));
-  }
+async function initDB() {
+  await connect();
+  // collections/indexes are ensured in connect()
+  return true;
 }
 
-// Přečti celou databázi
-function readDB() {
-  try {
-    const data = fs.readFileSync(DB_FILE, 'utf8');
-    return JSON.parse(data);
-  } catch (error) {
-    console.error('Chyba při čtení databáze:', error);
-    return { users: {} };
-  }
-}
-
-// Zapiš do databáze
-function writeDB(data) {
-  try {
-    fs.writeFileSync(DB_FILE, JSON.stringify(data, null, 2));
-    return true;
-  } catch (error) {
-    console.error('Chyba při zápisu do databáze:', error);
-    return false;
-  }
-}
-
-// Registrace uživatele
-function registerUser(username, password) {
+async function registerUser(username, password) {
   if (!username || !password) {
     return { success: false, error: 'Username a password jsou povinné' };
   }
-
-  const db = readDB();
-
-  if (db.users[username]) {
-    return { success: false, error: 'Uživatel již existuje' };
-  }
+  const db = getDb();
+  const users = db.collection('users');
 
   const hashedPassword = bcrypt.hashSync(password, 10);
-  console.log(`[DB] Registrace: ${username}, Plain: ${password}, Hash: ${hashedPassword}`);
-
-  db.users[username] = {
-    username,
-    password: hashedPassword, // Ulož hash místo plain textu
-    completedMazes: 0, // Počet dokončených bludišť
-    deaths: 0, // Počet smrtí
-    steps: 0, // Celkový počet kroků
-  };
-
-  writeDB(db);
-  return { success: true, message: 'Registrace úspěšná', userId: username };
+  try {
+    const now = new Date().toISOString();
+    const doc = {
+      username,
+      password: hashedPassword,
+      completedMazes: 0,
+      deaths: 0,
+      steps: 0,
+      createdAt: now,
+    };
+    await users.insertOne(doc);
+    return { success: true, message: 'Registrace úspěšná', userId: username };
+  } catch (err) {
+    if (err.code === 11000) { // duplicate key
+      return { success: false, error: 'Uživatel již existuje' };
+    }
+    console.error('DB register error', err);
+    return { success: false, error: 'Chyba při registraci' };
+  }
 }
 
-// Přihlášení uživatele
-function loginUser(username, password) {
+async function loginUser(username, password) {
   if (!username || !password) {
     return { success: false, error: 'Username a password jsou povinné' };
   }
-
-  const db = readDB();
-  const user = db.users[username];
-
+  const db = getDb();
+  const users = db.collection('users');
+  const user = await users.findOne({ username });
   if (!user || !bcrypt.compareSync(password, user.password)) {
     return { success: false, error: 'Nesprávné přihlašovací údaje' };
   }
-
   return { success: true, message: 'Přihlášení úspěšné', userId: username };
 }
 
-// Získej uživatele
-function getUser(username) {
-  const db = readDB();
-  return db.users[username] || null;
+async function getUser(username) {
+  const db = getDb();
+  const users = db.collection('users');
+  const user = await users.findOne({ username }, { projection: { _id: 0, password: 0 } });
+  return user || null;
 }
 
-// Aktualizuj uživatele - jen statistiky!
-function updateUser(username, updates) {
-  const db = readDB();
+async function updateUser(username, updates) {
+  const db = getDb();
+  const users = db.collection('users');
 
-  if (!db.users[username]) {
-    return { success: false, error: 'Uživatel nenalezen' };
-  }
-
-  // Povolená pole k aktualizaci
   const allowedFields = ['completedMazes', 'deaths', 'steps'];
-  const filteredUpdates = {};
-  
-  for (const field of allowedFields) {
-    if (field in updates) {
-      filteredUpdates[field] = updates[field];
-    }
+  const set = {};
+  for (const f of allowedFields) {
+    if (f in updates) set[f] = updates[f];
+  }
+  if (Object.keys(set).length === 0) {
+    const user = await users.findOne({ username }, { projection: { _id: 0, password: 0 } });
+    if (!user) return { success: false, error: 'Uživatel nenalezen' };
+    return { success: true, data: user };
   }
 
-  db.users[username] = {
-    ...db.users[username],
-    ...filteredUpdates,
-    username, // Vrátí původní username
-  };
+  const res = await users.findOneAndUpdate(
+    { username },
+    { $set: set },
+    { returnDocument: 'after', projection: { _id: 0, password: 0 } }
+  );
 
-  writeDB(db);
-  return { success: true, data: db.users[username] };
+  if (!res.value) return { success: false, error: 'Uživatel nenalezen' };
+  return { success: true, data: res.value };
 }
 
-// Všichni uživatelé (jen pro debug)
-function getAllUsers() {
-  const db = readDB();
-  return Object.keys(db.users).map(username => ({
-    username,
-    createdAt: db.users[username].createdAt,
-  }));
+async function getAllUsers() {
+  const db = getDb();
+  const users = db.collection('users');
+  const rows = await users.find({}, { projection: { _id: 0, username: 1, createdAt: 1 } }).toArray();
+  return rows;
 }
 
 module.exports = {
