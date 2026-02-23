@@ -3,9 +3,9 @@ const router = express.Router();
 const { register, login } = require('../controllers/authController');
 
 // Registrace
-router.post('/register', async (req, res) => {
+router.post('/register', (req, res) => {
   const { username, password } = req.body;
-  const result = await register(username, password);
+  const result = register(username, password);
   
   if (!result.success) {
     return res.status(400).json(result);
@@ -15,9 +15,9 @@ router.post('/register', async (req, res) => {
 });
 
 // Přihlášení
-router.post('/login', async (req, res) => {
+router.post('/login', (req, res) => {
   const { username, password } = req.body;
-  const result = await login(username, password);
+  const result = login(username, password);
   
   if (!result.success) {
     return res.status(401).json(result);
