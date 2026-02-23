@@ -1,6 +1,6 @@
 const { MongoClient } = require('mongodb');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ucenyp23:edRisKZ3EyeLnTws@cluster0.uoa05vh.mongodb.net/?appName=Cluster0';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ucenyp23:edRisKZ3EyeLnTws@cluster0.uoa05vh.mongodb.net/?appName=Cluster0&tls=true';
 const DB_NAME = process.env.MONGODB_DB || 'mazegame';
 
 let client;
