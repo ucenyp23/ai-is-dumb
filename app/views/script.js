@@ -1,4 +1,4 @@
-const API_URL = 'https://ai-is-dumb.onrender.com:3000/api';
+const API_URL = 'https://ai-is-dumb.onrender.com/api';
 
 let currentUserId = null;
 let mazeState = null;
