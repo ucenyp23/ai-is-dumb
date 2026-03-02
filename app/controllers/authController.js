@@ -1,4 +1,4 @@
-const db = require('../db');
+const db = require("../db");
 
 // Registrace
 async function register(username, password) {

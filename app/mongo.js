@@ -1,7 +1,9 @@
-const { MongoClient } = require('mongodb');
+const { MongoClient } = require("mongodb");
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ucenyp23:edRisKZ3EyeLnTws@cluster0.uoa05vh.mongodb.net/?appName=Cluster0&tls=true';
-const DB_NAME = process.env.MONGODB_DB || 'mazegame';
+const MONGODB_URI =
+  process.env.MONGODB_URI ||
+  "mongodb+srv://ucenyp23:edRisKZ3EyeLnTws@cluster0.uoa05vh.mongodb.net/?appName=Cluster0&tls=true";
+const DB_NAME = process.env.MONGODB_DB || "mazegame";
 
 let client;
 let db;
@@ -11,12 +13,12 @@ async function connect() {
   client = new MongoClient(MONGODB_URI); // no useNewUrlParser/useUnifiedTopology
   await client.connect();
   db = client.db(DB_NAME);
-  await db.collection('users').createIndex({ username: 1 }, { unique: true });
+  await db.collection("users").createIndex({ username: 1 }, { unique: true });
   return db;
 }
 
 function getDb() {
-  if (!db) throw new Error('MongoDB not connected. Call connect() first.');
+  if (!db) throw new Error("MongoDB not connected. Call connect() first.");
   return db;
 }
 

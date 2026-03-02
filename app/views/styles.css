@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
   background: linear-gradient(135deg, #3a3a2e 0%, #2a2a1e 50%, #3a3a2e 100%);
   min-height: 100vh;
   display: flex;
@@ -18,15 +18,23 @@ body {
 
 /* Kamenná textura pozadí */
 body::before {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    radial-gradient(circle at 20% 50%, rgba(76, 110, 90, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 80%, rgba(101, 120, 85, 0.1) 0%, transparent 50%),
+  background-image:
+    radial-gradient(
+      circle at 20% 50%,
+      rgba(76, 110, 90, 0.1) 0%,
+      transparent 50%
+    ),
+    radial-gradient(
+      circle at 80% 80%,
+      rgba(101, 120, 85, 0.1) 0%,
+      transparent 50%
+    ),
     repeating-linear-gradient(
       45deg,
       transparent,
@@ -40,13 +48,13 @@ body::before {
 
 /* Mech/trhliny efekt */
 body::after {
-  content: '';
+  content: "";
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
+  background-image:
     repeating-linear-gradient(
       90deg,
       transparent 0px,
@@ -73,11 +81,12 @@ body::after {
   z-index: 2;
 }
 
-.auth-box, .game-box {
+.auth-box,
+.game-box {
   background: linear-gradient(135deg, #4a4a38 0%, #3a3a2e 50%, #4a4a38 100%);
   border: 4px solid #6b7355;
   border-radius: 8px;
-  box-shadow: 
+  box-shadow:
     0 0 30px rgba(0, 0, 0, 0.7),
     inset 0 0 40px rgba(120, 140, 100, 0.2),
     inset 0 0 20px rgba(0, 0, 0, 0.3);
@@ -88,21 +97,45 @@ body::after {
 }
 
 /* Praskliny v kamenech */
-.auth-box::before, .game-box::before {
-  content: '';
+.auth-box::before,
+.game-box::before {
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-image: 
-    linear-gradient(90deg, transparent 24%, rgba(76, 68, 50, 0.05) 25%, rgba(76, 68, 50, 0.05) 26%, transparent 27%, transparent 74%, rgba(76, 68, 50, 0.05) 75%, rgba(76, 68, 50, 0.05) 76%, transparent 77%, transparent),
-    linear-gradient(0deg, transparent 24%, rgba(76, 68, 50, 0.05) 25%, rgba(76, 68, 50, 0.05) 26%, transparent 27%, transparent 74%, rgba(76, 68, 50, 0.05) 75%, rgba(76, 68, 50, 0.05) 76%, transparent 77%, transparent);
+  background-image:
+    linear-gradient(
+      90deg,
+      transparent 24%,
+      rgba(76, 68, 50, 0.05) 25%,
+      rgba(76, 68, 50, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(76, 68, 50, 0.05) 75%,
+      rgba(76, 68, 50, 0.05) 76%,
+      transparent 77%,
+      transparent
+    ),
+    linear-gradient(
+      0deg,
+      transparent 24%,
+      rgba(76, 68, 50, 0.05) 25%,
+      rgba(76, 68, 50, 0.05) 26%,
+      transparent 27%,
+      transparent 74%,
+      rgba(76, 68, 50, 0.05) 75%,
+      rgba(76, 68, 50, 0.05) 76%,
+      transparent 77%,
+      transparent
+    );
   background-size: 50px 50px;
   pointer-events: none;
 }
 
-.auth-box, .game-box {
+.auth-box,
+.game-box {
   z-index: 1;
 }
 
@@ -127,7 +160,11 @@ h1 {
 .stats-panel {
   display: flex;
   gap: 20px;
-  background: linear-gradient(135deg, rgba(168, 201, 127, 0.15) 0%, rgba(139, 157, 127, 0.15) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(168, 201, 127, 0.15) 0%,
+    rgba(139, 157, 127, 0.15) 100%
+  );
   padding: 15px 20px;
   border-radius: 5px;
   border: 2px solid #6b7355;
@@ -176,7 +213,7 @@ input {
   background: rgba(58, 58, 46, 0.6);
   color: #c9b89d;
   transition: all 0.3s;
-  font-family: 'Georgia', serif;
+  font-family: "Georgia", serif;
 }
 
 input:focus {
@@ -197,13 +234,17 @@ button {
   transition: all 0.3s;
   margin-top: 10px;
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
-  font-family: 'Georgia', serif;
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  font-family: "Georgia", serif;
 }
 
 button:hover {
   background: linear-gradient(135deg, #8a9c7f 0%, #7a8c6f 100%);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 6px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
   transform: translateY(-1px);
 }
 
@@ -245,7 +286,11 @@ button:hover {
 }
 
 .game-info {
-  background: linear-gradient(135deg, rgba(168, 201, 127, 0.1) 0%, rgba(139, 157, 127, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(168, 201, 127, 0.1) 0%,
+    rgba(139, 157, 127, 0.1) 100%
+  );
   padding: 15px;
   border-radius: 5px;
   margin: 20px 0;
@@ -258,13 +303,19 @@ button:hover {
 }
 
 .maze-controls {
-  background: linear-gradient(135deg, rgba(168, 201, 127, 0.1) 0%, rgba(139, 157, 127, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(168, 201, 127, 0.1) 0%,
+    rgba(139, 157, 127, 0.1) 100%
+  );
   padding: 20px;
   border-radius: 5px;
   margin: 20px 0;
   text-align: center;
   border: 2px solid #6b7355;
-  box-shadow: inset 0 0 10px rgba(120, 140, 100, 0.2), 0 4px 8px rgba(0, 0, 0, 0.3);
+  box-shadow:
+    inset 0 0 10px rgba(120, 140, 100, 0.2),
+    0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .size-controls {
@@ -357,7 +408,8 @@ button:hover {
 }
 
 @keyframes jumpscareFlash {
-  0%, 100% {
+  0%,
+  100% {
     background: #000;
   }
   50% {
@@ -388,7 +440,9 @@ button:hover {
   cursor: pointer;
   max-width: 100%;
   height: auto;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7), inset 0 0 20px rgba(120, 140, 100, 0.1);
+  box-shadow:
+    0 0 20px rgba(0, 0, 0, 0.7),
+    inset 0 0 20px rgba(120, 140, 100, 0.1);
 }
 
 .message-box {
@@ -402,21 +456,33 @@ button:hover {
 }
 
 .message-box.success {
-  background: linear-gradient(135deg, rgba(168, 201, 127, 0.2) 0%, rgba(168, 201, 127, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(168, 201, 127, 0.2) 0%,
+    rgba(168, 201, 127, 0.1) 100%
+  );
   color: #a8c97f;
   border: 2px solid #a8c97f;
   box-shadow: 0 0 15px rgba(168, 201, 127, 0.3);
 }
 
 .message-box.error {
-  background: linear-gradient(135deg, rgba(184, 134, 100, 0.2) 0%, rgba(184, 134, 100, 0.1) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(184, 134, 100, 0.2) 0%,
+    rgba(184, 134, 100, 0.1) 100%
+  );
   color: #d4a574;
   border: 2px solid #d4a574;
   box-shadow: 0 0 15px rgba(184, 134, 100, 0.3);
 }
 
 .message-box.death {
-  background: linear-gradient(135deg, rgba(212, 117, 94, 0.3) 0%, rgba(192, 92, 71, 0.2) 100%);
+  background: linear-gradient(
+    135deg,
+    rgba(212, 117, 94, 0.3) 0%,
+    rgba(192, 92, 71, 0.2) 100%
+  );
   color: #e8a99f;
   border: 2px solid #d4755e;
   box-shadow: 0 0 20px rgba(212, 117, 94, 0.5);
@@ -441,7 +507,7 @@ button:hover {
   padding: 50px;
   border-radius: 8px;
   text-align: center;
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.8),
     0 0 30px rgba(168, 201, 127, 0.2),
     inset 0 0 30px rgba(168, 201, 127, 0.1);
@@ -478,9 +544,17 @@ button:hover {
 }
 
 @keyframes bounce In {
-  0% { transform: scale(0.5); opacity: 0; }
-  70% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes fall {
@@ -508,7 +582,8 @@ button:hover {
 }
 
 @media (max-width: 600px) {
-  .auth-box, .game-box {
+  .auth-box,
+  .game-box {
     padding: 20px;
   }
 
@@ -516,7 +591,8 @@ button:hover {
     font-size: 28px;
   }
 
-  input, button {
+  input,
+  button {
     font-size: 14px;
     padding: 10px;
   }
@@ -541,7 +617,8 @@ button:hover {
 }
 
 @media (max-width: 600px) {
-  .auth-box, .game-box {
+  .auth-box,
+  .game-box {
     padding: 20px;
   }
 
@@ -556,7 +633,8 @@ button:hover {
     margin: 0;
   }
 
-  input, button {
+  input,
+  button {
     font-size: 14px;
     padding: 10px;
   }

@@ -2,22 +2,31 @@
   "name": "maze-game",
   "version": "1.0.0",
   "description": "Webová hra s náhodně generovaným bludištěm",
+  "keywords": [
+    "website",
+    "game",
+    "maze",
+    "node",
+    "express",
+    "mongodb"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ucenyp23/ai-is-dumb.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "author": "Pavel Učený <ucenyp23@spstrutnov.cz>, Antonín Vaňouček <vanouceka23@spstrutnov.cz>",
+  "type": "module",
   "main": "app/index.js",
   "scripts": {
-    "start": "node app/index.js",
-    "dev": "node app/index.js"
+    "start": "node app/index.js"
   },
-  "keywords": [
-    "maze",
-    "game"
-  ],
-  "author": "",
-  "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "express": "^4.18.2",
+    "body-parser": "^2.2.2",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "mongodb": "^7.1.0"
   }
 }

@@ -1,18 +1,22 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { initMaze, getMaze, movePlayer } = require('../controllers/mazeController');
-const { getUser } = require('../controllers/authController');
+const {
+  initMaze,
+  getMaze,
+  movePlayer,
+} = require("../controllers/mazeController");
+const { getUser } = require("../controllers/authController");
 
 // Inicializace nového bludiště pro uživatele
-router.post('/maze/init', async (req, res) => {
+router.post("/maze/init", async (req, res) => {
   const { userId, width, height } = req.body;
 
   if (!userId) {
-    return res.status(400).json({ success: false, error: 'UserId je povinné' });
+    return res.status(400).json({ success: false, error: "UserId je povinné" });
   }
 
   const result = await initMaze(userId, width || 15, height || 15);
-  
+
   if (!result.success) {
     return res.status(400).json(result);
   }
@@ -21,7 +25,7 @@ router.post('/maze/init', async (req, res) => {
 });
 
 // Získej bludiště a pozici hráče
-router.get('/maze/:userId', async (req, res) => {
+router.get("/maze/:userId", async (req, res) => {
   const { userId } = req.params;
   const result = await getMaze(userId);
 
@@ -33,11 +37,13 @@ router.get('/maze/:userId', async (req, res) => {
 });
 
 // Pohyb hráče
-router.post('/maze/move', async (req, res) => {
+router.post("/maze/move", async (req, res) => {
   const { userId, x, y } = req.body;
 
   if (!userId || x === undefined || y === undefined) {
-    return res.status(400).json({ success: false, error: 'UserId, x a y jsou povinné' });
+    return res
+      .status(400)
+      .json({ success: false, error: "UserId, x a y jsou povinné" });
   }
 
   const result = await movePlayer(userId, x, y);
@@ -50,12 +56,14 @@ router.post('/maze/move', async (req, res) => {
 });
 
 // Získej statistiky uživatele
-router.get('/stats/:userId', async (req, res) => {
+router.get("/stats/:userId", async (req, res) => {
   const { userId } = req.params;
   const user = await getUser(userId);
 
   if (!user) {
-    return res.status(404).json({ success: false, error: 'Uživatel nenalezen' });
+    return res
+      .status(404)
+      .json({ success: false, error: "Uživatel nenalezen" });
   }
 
   res.json({
@@ -65,7 +73,7 @@ router.get('/stats/:userId', async (req, res) => {
       completedMazes: user.completedMazes || 0,
       deaths: user.deaths || 0,
       steps: user.steps || 0,
-    }
+    },
   });
 });
 

@@ -1,105 +1,189 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="cs">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🎮 Hra Bludiště</title>
-  <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-  <div id="app">
-    <!-- Autentizace -->
-    <div id="authContainer" class="container">
-      <div class="auth-box">
-        <h1>🎮 Hra Bludiště</h1>
-        
-        <div id="loginForm" class="auth-form">
-          <h2>Přihlášení</h2>
-          <input type="text" id="loginUsername" placeholder="Uživatelské jméno" required>
-          <input type="password" id="loginPassword" placeholder="Heslo" required>
-          <button onclick="login()">Přihlásit se</button>
-          <p class="toggle-text">Nemáš účet? <a href="javascript:void(0);" onclick="toggleForms(); return false;">Zaregistruj se</a></p>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🎮 Hra Bludiště</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <div id="app">
+      <!-- Autentizace -->
+      <div id="authContainer" class="container">
+        <div class="auth-box">
+          <h1>🎮 Hra Bludiště</h1>
 
-        <div id="registerForm" class="auth-form" style="display: none;">
-          <h2>Registrace</h2>
-          <input type="text" id="registerUsername" placeholder="Uživatelské jméno" required>
-          <input type="password" id="registerPassword" placeholder="Heslo" required>
-          <button onclick="register()">Zaregistrovat se</button>
-          <p class="toggle-text">Máš účet? <a href="javascript:void(0);" onclick="toggleForms(); return false;">Přihláš se</a></p>
-        </div>
+          <div id="loginForm" class="auth-form">
+            <h2>Přihlášení</h2>
+            <input
+              type="text"
+              id="loginUsername"
+              placeholder="Uživatelské jméno"
+              required
+            />
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Heslo"
+              required
+            />
+            <button onclick="login()">Přihlásit se</button>
+            <p class="toggle-text">
+              Nemáš účet?
+              <a
+                href="javascript:void(0);"
+                onclick="
+                  toggleForms();
+                  return false;
+                "
+                >Zaregistruj se</a
+              >
+            </p>
+          </div>
 
-        <div id="errorMessage" class="error-message"></div>
+          <div id="registerForm" class="auth-form" style="display: none">
+            <h2>Registrace</h2>
+            <input
+              type="text"
+              id="registerUsername"
+              placeholder="Uživatelské jméno"
+              required
+            />
+            <input
+              type="password"
+              id="registerPassword"
+              placeholder="Heslo"
+              required
+            />
+            <button onclick="register()">Zaregistrovat se</button>
+            <p class="toggle-text">
+              Máš účet?
+              <a
+                href="javascript:void(0);"
+                onclick="
+                  toggleForms();
+                  return false;
+                "
+                >Přihláš se</a
+              >
+            </p>
+          </div>
+
+          <div id="errorMessage" class="error-message"></div>
+        </div>
+      </div>
+
+      <!-- Hra -->
+      <div id="gameContainer" class="container" style="display: none">
+        <div class="game-box">
+          <div class="game-header">
+            <h1>🎮 Bludiště</h1>
+            <div class="stats-panel">
+              <div class="stat-item">
+                <span class="stat-label">🏆 Vítězství:</span>
+                <span class="stat-value" id="statsWins">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">💀 Smrti:</span>
+                <span class="stat-value" id="statsDeath">0</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-label">👣 Kroky:</span>
+                <span class="stat-value" id="statsMoves">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="maze-controls">
+            <div class="size-controls">
+              <div class="size-input">
+                <label for="mazeWidth"
+                  >Šírka: <span id="widthValue">15</span></label
+                >
+                <input
+                  type="range"
+                  id="mazeWidth"
+                  min="7"
+                  max="51"
+                  step="2"
+                  value="15"
+                />
+              </div>
+              <div class="size-input">
+                <label for="mazeHeight"
+                  >Výška: <span id="heightValue">15</span></label
+                >
+                <input
+                  type="range"
+                  id="mazeHeight"
+                  min="7"
+                  max="51"
+                  step="2"
+                  value="15"
+                />
+              </div>
+            </div>
+            <button onclick="changeMazeSize()">Nová hra</button>
+            <button
+              id="darkModeToggle"
+              onclick="toggleDarkMode()"
+              class="dark-mode-btn"
+            >
+              🌙 Tma vypnutá
+            </button>
+            <button id="zoomToggle" onclick="toggleZoom()" class="zoom-btn">
+              👁️ Zoom vypnutý
+            </button>
+            <div
+              class="zoom-level-control"
+              id="zoomLevelControl"
+              style="display: none"
+            >
+              <label for="zoomLevel"
+                >Zoom úroveň: <span id="zoomLevelValue">10</span></label
+              >
+              <input
+                type="range"
+                id="zoomLevel"
+                min="5"
+                max="20"
+                step="1"
+                value="10"
+                oninput="changeZoomLevel(this.value)"
+              />
+            </div>
+          </div>
+
+          <canvas id="mazeCanvas"></canvas>
+
+          <div id="victoryModal" class="victory-modal" style="display: none">
+            <div class="victory-content">
+              <h2>🎉 Dosáhl jsi cíle! 🎉</h2>
+              <p>Gratuluji! Vyhrál jsi!</p>
+              <button onclick="initMaze()">Hrát znovu</button>
+            </div>
+          </div>
+
+          <div class="game-info">
+            <p><strong>Ovládání:</strong></p>
+            <p>
+              🎯 Klikni na políčko nebo použij <strong>W</strong>,
+              <strong>A</strong>, <strong>S</strong>, <strong>D</strong>
+            </p>
+            <p>
+              ✅ Dosáhni cíle (zelená políčka) <br />
+              🚫 Vyhni se zdím (tmavé políčka) <br />
+              🟦 Tvá pozice (modrá políčka)
+            </p>
+          </div>
+          <div id="messageBox" class="message-box"></div>
+          <button onclick="logout()">Odhlásit se</button>
+        </div>
       </div>
     </div>
-
-    <!-- Hra -->
-    <div id="gameContainer" class="container" style="display: none;">
-      <div class="game-box">
-        <div class="game-header">
-          <h1>🎮 Bludiště</h1>
-          <div class="stats-panel">
-            <div class="stat-item">
-              <span class="stat-label">🏆 Vítězství:</span>
-              <span class="stat-value" id="statsWins">0</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">💀 Smrti:</span>
-              <span class="stat-value" id="statsDeath">0</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-label">👣 Kroky:</span>
-              <span class="stat-value" id="statsMoves">0</span>
-            </div>
-          </div>
-        </div>
-        
-        <div class="maze-controls">
-          <div class="size-controls">
-            <div class="size-input">
-              <label for="mazeWidth">Šírka: <span id="widthValue">15</span></label>
-              <input type="range" id="mazeWidth" min="7" max="51" step="2" value="15">
-            </div>
-            <div class="size-input">
-              <label for="mazeHeight">Výška: <span id="heightValue">15</span></label>
-              <input type="range" id="mazeHeight" min="7" max="51" step="2" value="15">
-            </div>
-          </div>
-          <button onclick="changeMazeSize()">Nová hra</button>
-          <button id="darkModeToggle" onclick="toggleDarkMode()" class="dark-mode-btn">🌙 Tma vypnutá</button>
-          <button id="zoomToggle" onclick="toggleZoom()" class="zoom-btn">👁️ Zoom vypnutý</button>
-          <div class="zoom-level-control" id="zoomLevelControl" style="display: none;">
-            <label for="zoomLevel">Zoom úroveň: <span id="zoomLevelValue">10</span></label>
-            <input type="range" id="zoomLevel" min="5" max="20" step="1" value="10" oninput="changeZoomLevel(this.value)">
-          </div>
-        </div>
-
-        <canvas id="mazeCanvas"></canvas>
-        
-        <div id="victoryModal" class="victory-modal" style="display: none;">
-          <div class="victory-content">
-            <h2>🎉 Dosáhl jsi cíle! 🎉</h2>
-            <p>Gratuluji! Vyhrál jsi!</p>
-            <button onclick="initMaze()">Hrát znovu</button>
-          </div>
-        </div>
-        
-        <div class="game-info">
-          <p><strong>Ovládání:</strong></p>
-          <p>🎯 Klikni na políčko nebo použij <strong>W</strong>, <strong>A</strong>, <strong>S</strong>, <strong>D</strong></p>
-          <p>✅ Dosáhni cíle (zelená políčka) <br>
-             🚫 Vyhni se zdím (tmavé políčka) <br>
-             🟦 Tvá pozice (modrá políčka)</p>
-        </div>
-        <div id="messageBox" class="message-box"></div>
-        <button onclick="logout()">Odhlásit se</button>
-      </div>
+    <div id="jumpscare" class="jumpscare" style="display: none">
+      <div class="jumpscare-content">👹</div>
     </div>
-  <div id="jumpscare" class="jumpscare" style="display: none;">
-    <div class="jumpscare-content">
-      👹
-    </div>
-  </div>
-    <script src="script.js"></script>
-</body>
+  </body>
 </html>
