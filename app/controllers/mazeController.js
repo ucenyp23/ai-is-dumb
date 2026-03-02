@@ -74,6 +74,13 @@ async function movePlayer(userId, x, y) {
 
   const { maze, playerPos, goalPos, startPos } = mazeData;
 
+  x = parseInt(x);
+  y = parseInt(y);
+
+  if (isNaN(x) || isNaN(y)) {
+    return { success: false, error: 'Neplatné souřadnice' };
+  }
+
   if (x < 0 || x >= maze[0].length || y < 0 || y >= maze.length) {
     return { success: false, error: 'Pozice mimo bludiště' };
   }
@@ -85,6 +92,10 @@ async function movePlayer(userId, x, y) {
 
   const cell = maze[y][x];
 
+  if (!cell) {
+    return { success: false, error: 'Neplatná buňka' };
+  }
+
   if (cell.type === 1) {
     return { success: false, error: 'Nemůžeš projít zdí!' };
   }
@@ -94,7 +105,7 @@ async function movePlayer(userId, x, y) {
     return { success: false, error: 'Uživatel nenalezen' };
   }
 
-  // Speciální zeď
+  // 🔥 SPIKY
   if (cell.type === 2) {
     mazeData.playerPos = startPos;
 
@@ -103,18 +114,20 @@ async function movePlayer(userId, x, y) {
       steps: (dbUser.steps || 0) + 1,
     });
 
+    const stats = updatedUser.success && updatedUser.data
+      ? updatedUser.data
+      : dbUser;
+
     return {
       success: true,
       playerPos: startPos,
       died: true,
       message: '💀 Narazil jsi na trny! Začínáš znovu...',
-      stats: updatedUser.success && updatedUser.data
-        ? updatedUser.data
-        : dbUser,
+      stats
     };
   }
 
-  // Normální pohyb
+  // 🔥 Normální pohyb
   mazeData.playerPos = { x, y };
   const reachedGoal = x === goalPos.x && y === goalPos.y;
 
@@ -125,6 +138,10 @@ async function movePlayer(userId, x, y) {
     }),
   });
 
+  const stats = updatedUser.success && updatedUser.data
+    ? updatedUser.data
+    : dbUser;
+
   return {
     success: true,
     playerPos: { x, y },
@@ -132,7 +149,7 @@ async function movePlayer(userId, x, y) {
     message: reachedGoal
       ? '🎉 Dosáhl jsi cíle! Gratuluji!'
       : 'Pohyb proveden',
-    stats: updatedUser.success ? updatedUser.data : dbUser,
+    stats
   };
 }
 
