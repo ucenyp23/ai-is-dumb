@@ -4,26 +4,25 @@ const { getUser } = require('./authController');
 const db = require('../db');
 
 // In-memory storage pro bludiště během hry (není v databázi!)
-const mazeStorage = new Map(); // userId -> { maze, startPos, goalPos, playerPos, portalA, portalB }
+const mazeStorage = new Map();
 
 // Inicializace nového bludiště pro uživatele
-function initMaze(userId, width = 15, height = 15) {
-  const user = getUser(userId);
-  
+async function initMaze(userId, width = 15, height = 15) {
+  const user = await getUser(userId);
+
   if (!user) {
     return { success: false, error: 'Uživatel nenalezen' };
   }
 
-  // Ověř velikost - mezi 7 a 51 (lichá čísla)
-  width = Math.max(7, Math.min(51, width));
+  width = Math.max(7, Math.min(51, parseInt(width)));
   if (width % 2 === 0) width += 1;
-  
-  height = Math.max(7, Math.min(51, height));
+
+  height = Math.max(7, Math.min(51, parseInt(height)));
   if (height % 2 === 0) height += 1;
 
-  const { maze, startPos, goalPos, portalA, portalB } = generateMaze(width, height);
+  const { maze, startPos, goalPos, portalA, portalB } =
+    generateMaze(width, height);
 
-  // Ulož bludiště v paměti (nikoli v databázi!)
   mazeStorage.set(userId, {
     maze,
     startPos,
@@ -45,8 +44,8 @@ function initMaze(userId, width = 15, height = 15) {
   };
 }
 
-// Získej bludiště a pozici hráče
-function getMaze(userId) {
+// Získej bludiště
+async function getMaze(userId) {
   const mazeData = mazeStorage.get(userId);
 
   if (!mazeData) {
@@ -66,7 +65,7 @@ function getMaze(userId) {
 }
 
 // Pohyb hráče
-function movePlayer(userId, x, y) {
+async function movePlayer(userId, x, y) {
   const mazeData = mazeStorage.get(userId);
 
   if (!mazeData) {
@@ -75,12 +74,10 @@ function movePlayer(userId, x, y) {
 
   const { maze, playerPos, goalPos, startPos } = mazeData;
 
-  // Kontrola, zda je cílová pozice v poli
   if (x < 0 || x >= maze[0].length || y < 0 || y >= maze.length) {
     return { success: false, error: 'Pozice mimo bludiště' };
   }
 
-  // Kontrola, zda se hráč pohybuje pouze na sousední políčko
   const distance = Math.max(Math.abs(x - playerPos.x), Math.abs(y - playerPos.y));
   if (distance > 1) {
     return { success: false, error: 'Lze se pohybovat pouze na sousední políčko' };
@@ -88,170 +85,52 @@ function movePlayer(userId, x, y) {
 
   const cell = maze[y][x];
 
-  // Validace pohybu - nelze projít normálními zdí
   if (cell.type === 1) {
     return { success: false, error: 'Nemůžeš projít zdí!' };
   }
 
-  // Speciální zdi - hráč umírá
+  const dbUser = await getUser(userId);
+  if (!dbUser) {
+    return { success: false, error: 'Uživatel nenalezen' };
+  }
+
+  // Speciální zeď
   if (cell.type === 2) {
-    const newPlayerPos = startPos;
-    const dbUser = getUser(userId); // Přečti staré hodnoty z databáze
-    mazeData.playerPos = newPlayerPos;
-    const updatedUser = db.updateUser(userId, { 
+    mazeData.playerPos = startPos;
+
+    const updatedUser = await db.updateUser(userId, {
       deaths: (dbUser.deaths || 0) + 1,
       steps: (dbUser.steps || 0) + 1,
     });
-    return { 
-      success: true, 
-      playerPos: newPlayerPos,
+
+    return {
+      success: true,
+      playerPos: startPos,
       died: true,
       message: '💀 Narazil jsi na trny! Začínáš znovu...',
-      stats: {
-        completedMazes: updatedUser.data.completedMazes || 0,
-        deaths: updatedUser.data.deaths || 0,
-        steps: updatedUser.data.steps || 0,
-      }
+      stats: updatedUser.success ? updatedUser.data : dbUser,
     };
   }
 
-  // Jednosměrné propusti - kontrola VSTUPU a automatický přesun
-  if (cell.type === 3) {
-    const dx = x - playerPos.x;
-    const dy = y - playerPos.y;
-    const direction = cell.direction;
-
-    // Zkontroluj, zda se hráč pohybuje v povoleném směru (vstup do propusti)
-    const canEnter = 
-      (direction === 'right' && dx < 0) ||   // Vstupuješ zleva do propusti směřující doprava
-      (direction === 'left' && dx > 0) ||    // Vstupuješ zprava do propusti směřující doleva
-      (direction === 'down' && dy < 0) ||    // Vstupuješ shora do propusti směřující dolů
-      (direction === 'up' && dy > 0);        // Vstupuješ zdola do propusti směřující nahoru
-
-    if (!canEnter) {
-      return { success: false, error: '🚫 Do jednosměrné propusti se můžeš vstoupit pouze z určité strany!' };
-    }
-
-    // Automatický přesun na druhou stranu propusti
-    let finalX = x;
-    let finalY = y;
-
-    if (direction === 'right') finalX = x + 1;
-    else if (direction === 'left') finalX = x - 1;
-    else if (direction === 'down') finalY = y + 1;
-    else if (direction === 'up') finalY = y - 1;
-
-    // Kontrola, zda výstupní pozice není mimo mapu nebo zeď
-    if (finalX < 0 || finalX >= maze[0].length || finalY < 0 || finalY >= maze.length) {
-      return { success: false, error: 'Propust vede mimo bludiště' };
-    }
-    
-    const exitCell = maze[finalY][finalX];
-    if (exitCell.type === 1) {
-      return { success: false, error: 'Propust vede do zdi' };
-    }
-
-    // Přesuň hráče na výstupní pozici
-    mazeData.playerPos = { x: finalX, y: finalY };
-    
-    // Kontrola cíle
-    const reachedGoal = finalX === goalPos.x && finalY === goalPos.y;
-
-    const dbUser = getUser(userId);
-    const updatedUser = db.updateUser(userId, { 
-      steps: (dbUser.steps || 0) + 1,
-      ...(reachedGoal && { completedMazes: (dbUser.completedMazes || 0) + 1 })
-    });
-
-    return {
-      success: true,
-      playerPos: { x: finalX, y: finalY },
-      reachedGoal,
-      message: reachedGoal ? '🎉 Dosáhl jsi cíle! Gratuluji!' : 'Prošel jsi propustí',
-      stats: {
-        completedMazes: updatedUser.data.completedMazes || 0,
-        deaths: updatedUser.data.deaths || 0,
-        steps: updatedUser.data.steps || 0,
-      }
-    };
-  }
-
-  // Portál A - přesun na portál B
-  if (cell.type === 4) {
-    if (!mazeData.portalB) {
-      return { success: false, error: 'Portál B nenalezen' };
-    }
-
-    mazeData.playerPos = { x: mazeData.portalB.x, y: mazeData.portalB.y };
-    const reachedGoal = mazeData.portalB.x === goalPos.x && mazeData.portalB.y === goalPos.y;
-
-    const dbUser = getUser(userId);
-    const updatedUser = db.updateUser(userId, { 
-      steps: (dbUser.steps || 0) + 1,
-      ...(reachedGoal && { completedMazes: (dbUser.completedMazes || 0) + 1 })
-    });
-
-    return {
-      success: true,
-      playerPos: { x: mazeData.portalB.x, y: mazeData.portalB.y },
-      reachedGoal,
-      message: reachedGoal ? '🎉 Dosáhl jsi cíle! Gratuluji!' : '🌀 Teleportován na portál B',
-      stats: {
-        completedMazes: updatedUser.data.completedMazes || 0,
-        deaths: updatedUser.data.deaths || 0,
-        steps: updatedUser.data.steps || 0,
-      }
-    };
-  }
-
-  // Portál B - přesun na portál A
-  if (cell.type === 5) {
-    if (!mazeData.portalA) {
-      return { success: false, error: 'Portál A nenalezen' };
-    }
-
-    mazeData.playerPos = { x: mazeData.portalA.x, y: mazeData.portalA.y };
-    const reachedGoal = mazeData.portalA.x === goalPos.x && mazeData.portalA.y === goalPos.y;
-
-    const dbUser = getUser(userId);
-    const updatedUser = db.updateUser(userId, { 
-      steps: (dbUser.steps || 0) + 1,
-      ...(reachedGoal && { completedMazes: (dbUser.completedMazes || 0) + 1 })
-    });
-
-    return {
-      success: true,
-      playerPos: { x: mazeData.portalA.x, y: mazeData.portalA.y },
-      reachedGoal,
-      message: reachedGoal ? '🎉 Dosáhl jsi cíle! Gratuluji!' : '🌀 Teleportován na portál A',
-      stats: {
-        completedMazes: updatedUser.data.completedMazes || 0,
-        deaths: updatedUser.data.deaths || 0,
-        steps: updatedUser.data.steps || 0,
-      }
-    };
-  }
-
-  // Normální pohyb na volné pole
+  // Normální pohyb
   mazeData.playerPos = { x, y };
   const reachedGoal = x === goalPos.x && y === goalPos.y;
 
-  const dbUser = getUser(userId);
-  const updatedUser = db.updateUser(userId, { 
+  const updatedUser = await db.updateUser(userId, {
     steps: (dbUser.steps || 0) + 1,
-    ...(reachedGoal && { completedMazes: (dbUser.completedMazes || 0) + 1 })
+    ...(reachedGoal && {
+      completedMazes: (dbUser.completedMazes || 0) + 1,
+    }),
   });
 
   return {
     success: true,
     playerPos: { x, y },
     reachedGoal,
-    message: reachedGoal ? '🎉 Dosáhl jsi cíle! Gratuluji!' : 'Pohyb proveden',
-    stats: {
-      completedMazes: updatedUser.data.completedMazes || 0,
-      deaths: updatedUser.data.deaths || 0,
-      steps: updatedUser.data.steps || 0,
-    }
+    message: reachedGoal
+      ? '🎉 Dosáhl jsi cíle! Gratuluji!'
+      : 'Pohyb proveden',
+    stats: updatedUser.success ? updatedUser.data : dbUser,
   };
 }
 

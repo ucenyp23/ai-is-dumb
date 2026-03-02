@@ -38,7 +38,10 @@ app.get('/', (req, res) => {
 });
 
 // Spuštění serveru
-app.listen(PORT, () => {
-  console.log(`🚀 Server běží na http://localhost:${PORT}`);
-  console.log(`🎮 Otevři si http://localhost:${PORT} v prohlížeči`);
+initDB().then(() => {
+  app.listen(PORT, () => {
+    console.log(`🚀 Server běží na http://localhost:${PORT}`);
+  });
+}).catch(err => {
+  console.error('Nepodařilo se připojit k DB:', err);
 });
