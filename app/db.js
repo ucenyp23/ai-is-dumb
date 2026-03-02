@@ -62,34 +62,47 @@ async function updateUser(username, updates) {
 
   const allowedFields = ['completedMazes', 'deaths', 'steps'];
   const set = {};
+
   for (const f of allowedFields) {
-    if (f in updates) set[f] = updates[f];
-  }
-
-  if (Object.keys(set).length === 0) {
-    const user = await users.findOne(
-      { username },
-      { projection: { _id: 0, password: 0 } }
-    );
-    if (!user) return { success: false, error: 'Uživatel nenalezen' };
-    return { success: true, data: user };
-  }
-
-  const updatedDoc = await users.findOneAndUpdate(
-    { username },
-    { $set: set },
-    {
-      returnDocument: 'after',
-      projection: { _id: 0, password: 0 }
+    if (f in updates && updates[f] !== undefined) {
+      set[f] = updates[f];
     }
-  );
-
-  // 🔥 TADY JE ZMĚNA
-  if (!updatedDoc) {
-    return { success: false, error: 'Uživatel nenalezen' };
   }
 
-  return { success: true, data: updatedDoc };
+  try {
+    if (Object.keys(set).length === 0) {
+      const user = await users.findOne(
+        { username },
+        { projection: { _id: 0, password: 0 } }
+      );
+
+      if (!user) {
+        return { success: false, error: 'Uživatel nenalezen' };
+      }
+
+      return { success: true, data: user };
+    }
+
+    const result = await users.findOneAndUpdate(
+      { username },
+      { $set: set },
+      {
+        returnDocument: 'after',
+        projection: { _id: 0, password: 0 }
+      }
+    );
+
+    // MongoDB driver v5+ vrací přímo dokument nebo null
+    if (!result) {
+      return { success: false, error: 'Uživatel nenalezen' };
+    }
+
+    return { success: true, data: result };
+
+  } catch (err) {
+    console.error('DB update error:', err);
+    return { success: false, error: 'Chyba při aktualizaci uživatele' };
+  }
 }
 
 async function getAllUsers() {
