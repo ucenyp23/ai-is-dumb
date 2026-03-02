@@ -65,20 +65,31 @@ async function updateUser(username, updates) {
   for (const f of allowedFields) {
     if (f in updates) set[f] = updates[f];
   }
+
   if (Object.keys(set).length === 0) {
-    const user = await users.findOne({ username }, { projection: { _id: 0, password: 0 } });
+    const user = await users.findOne(
+      { username },
+      { projection: { _id: 0, password: 0 } }
+    );
     if (!user) return { success: false, error: 'Uživatel nenalezen' };
     return { success: true, data: user };
   }
 
-  const res = await users.findOneAndUpdate(
+  const updatedDoc = await users.findOneAndUpdate(
     { username },
     { $set: set },
-    { returnDocument: 'after', projection: { _id: 0, password: 0 } }
+    {
+      returnDocument: 'after',
+      projection: { _id: 0, password: 0 }
+    }
   );
 
-  if (!res.value) return { success: false, error: 'Uživatel nenalezen' };
-  return { success: true, data: res.value };
+  // 🔥 TADY JE ZMĚNA
+  if (!updatedDoc) {
+    return { success: false, error: 'Uživatel nenalezen' };
+  }
+
+  return { success: true, data: updatedDoc };
 }
 
 async function getAllUsers() {

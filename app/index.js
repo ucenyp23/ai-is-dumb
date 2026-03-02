@@ -1,3 +1,11 @@
+process.on('uncaughtException', err => {
+  console.error('UNCAUGHT EXCEPTION:', err);
+});
+
+process.on('unhandledRejection', err => {
+  console.error('UNHANDLED REJECTION:', err);
+});
+
 const express = require('express');
 const cors = require('cors');
 const bodyParser = require('body-parser');
@@ -10,9 +18,6 @@ const mazeRoutes = require('./routers/mazeRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-
-// Inicializuj databázi
-initDB();
 
 // Middleware
 app.use(cors());

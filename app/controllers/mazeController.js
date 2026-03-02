@@ -108,7 +108,9 @@ async function movePlayer(userId, x, y) {
       playerPos: startPos,
       died: true,
       message: '💀 Narazil jsi na trny! Začínáš znovu...',
-      stats: updatedUser.success ? updatedUser.data : dbUser,
+      stats: updatedUser.success && updatedUser.data
+        ? updatedUser.data
+        : dbUser,
     };
   }
 
